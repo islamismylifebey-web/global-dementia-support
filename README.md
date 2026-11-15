@@ -4,7 +4,11 @@ A worldwide directory of dementia support, care, and assistance resources. The p
 
 ## Project status
 
-**Phase 2: Expanded public directory interface.** The repository includes a responsive homepage, general support search, a separate professional-discovery path, country and category filters, verification labels, privacy-conscious location sharing, and visible safety commitments. The interface is committed but has not been deployed or tested on a live domain. No verified professional dataset or emergency-response enrollment network is currently populated.
+**Phase 3: First public deployment.** The responsive public interface and read-only REST API are deployed together on Cloudflare Workers. The homepage includes a plain-language dementia support search, type-of-help and language filters, optional nearby search, professional discovery, verification labels, consent-based emergency location sharing, and visible safety commitments. The D1 database is connected but currently contains **0 resource records**. No verified professional dataset or emergency-response enrollment network is populated yet.
+
+**Live website:** https://global-dementia-support-api.beythetruth4ever.workers.dev
+
+**API health endpoint:** https://global-dementia-support-api.beythetruth4ever.workers.dev/api/v1/health
 
 ## Technology
 
@@ -70,7 +74,7 @@ Insert a record into the D1 `resources` table. Use a unique ID, a clear descript
 1. API foundation and D1 schema
 2. Admin workflow for adding, reviewing, and verifying resources
 3. Link checking, duplicate detection, and audit history
-4. Responsive front-end directory with accessible search, professional discovery, filters, and safety explanations (interface committed; deployment pending)
+4. Responsive front-end directory with accessible search, professional discovery, filters, and safety explanations (deployed on Cloudflare Workers)
 5. Professional credential review workflow, consent-based emergency-network enrollment, and carefully researched international resource collection
 
 ## License
