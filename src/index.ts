@@ -1,5 +1,6 @@
 export interface Env {
   DB: D1Database;
+  ASSETS: Fetcher;
   API_VERSION?: string;
 }
 
@@ -258,6 +259,6 @@ async function handleRequest(request: Request, env: Env): Promise<Response> {
 
 export default {
   fetch(request: Request, env: Env): Promise<Response> {
-    return handleRequest(request, env);
+    const url = new URL(request.url);\n    if (!url.pathname.startsWith("/api/") && request.method === "GET") {\n      return env.ASSETS.fetch(request);\n    }\n    return handleRequest(request, env);
   }
 };
