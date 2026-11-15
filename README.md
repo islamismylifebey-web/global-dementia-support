@@ -4,7 +4,7 @@ A worldwide directory of dementia support, care, and assistance resources. The p
 
 ## Project status
 
-**Phase 1: API foundation.** This repository currently contains the first REST API implementation and database schema. It is a starting point, not a claim that the directory is fully populated or deployed.
+**Phase 2: First accessible web interface.** The repository now includes a responsive public homepage, directory search UI, and an opt-in emergency location-sharing control, alongside the REST API and D1 schema. The interface is committed but has not yet been deployed or tested on a live domain. The directory is not yet populated with verified listings.
 
 ## Technology
 
@@ -70,8 +70,8 @@ Insert a record into the D1 `resources` table. Use a unique ID, a clear descript
 1. API foundation and D1 schema
 2. Admin workflow for adding, reviewing, and verifying resources
 3. Link checking, duplicate detection, and audit history
-4. Front-end directory with accessible search and filters
-5. Carefully researched international resource collection
+4. Responsive front-end directory with accessible search and filters (initial interface committed)
+5. Emergency location-sharing flow and carefully researched international resource collection
 
 ## License
 
