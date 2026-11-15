@@ -3,9 +3,9 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#f7f8f5">
-  <meta name="description" content="Find dementia support, care, and trusted help around the world.">
-  <title>Global Dementia Support</title>
+  <meta name="theme-color" content="#f6f8f5">
+  <meta name="description" content="Find dementia support, qualified professionals, care services, and trusted help around the world.">
+  <title>Global Dementia Support — Find trusted help</title>
   <link rel="stylesheet" href="/styles.css">
 </head>
 <body>
@@ -16,19 +16,24 @@
       <span>Global Dementia <strong>Support</strong></span>
     </a>
     <nav aria-label="Main navigation">
-      <a href="#find-help">Find help</a>
+      <a href="#find-help">Find support</a>
+      <a href="#professionals">Professionals</a>
       <a href="#emergency">Emergency help</a>
-      <a href="#about">About</a>
+      <a href="#safety">Our safeguards</a>
     </nav>
   </header>
 
   <main id="main">
     <section class="hero">
       <div class="hero-copy">
-        <p class="eyebrow">YOU ARE NOT ALONE</p>
-        <h1>Find the right support.<br><span>One step at a time.</span></h1>
-        <p class="hero-intro">A welcoming place to find dementia information, caregiver support, local services, and organizations you can trust.</p>
-        <a class="button button-primary" href="#find-help">Find support <span aria-hidden="true">→</span></a>
+        <p class="eyebrow">SUPPORT STARTS WITH A NEXT STEP</p>
+        <h1>Find the right help.<br><span>You're not alone.</span></h1>
+        <p class="hero-intro">Explore dementia information, caregiver support, community services, and qualified professionals. Start with what you need, wherever you are.</p>
+        <div class="hero-actions">
+          <a class="button button-primary" href="#find-help">Explore support <span aria-hidden="true">→</span></a>
+          <a class="text-link" href="#professionals">Find a professional</a>
+        </div>
+        <p class="hero-note">A growing directory. Listings are clearly labeled by verification status.</p>
       </div>
       <div class="hero-art" aria-hidden="true">
         <div class="sun"></div><div class="art-card"><span>Care</span><span>Connection</span><span>Community</span></div>
@@ -36,30 +41,43 @@
       </div>
     </section>
 
-    <section class="emergency-panel" id="emergency" aria-labelledby="emergency-title">
-      <div class="emergency-icon" aria-hidden="true">!</div>
-      <div class="emergency-copy">
-        <p class="eyebrow">NEED URGENT HELP?</p>
-        <h2 id="emergency-title">Share your location in an emergency</h2>
-        <p>If someone is in immediate danger, call your local emergency number first. You can choose to get your current location and share it with a trusted person or responder.</p>
-        <p class="privacy-note">Your location is not tracked in the background or sent to this directory. Your browser will ask permission when you press the button.</p>
-        <button class="button button-emergency" id="share-location" type="button">Get and share my location</button>
-        <p id="location-status" class="status" role="status" aria-live="polite">Location has not been requested.</p>
-      </div>
+    <section class="trust-strip" aria-label="Our directory principles">
+      <div><span class="trust-icon">✓</span><span><strong>Evidence matters</strong><small>Verification is never assumed</small></span></div>
+      <div><span class="trust-icon">⌖</span><span><strong>Privacy comes first</strong><small>Location is shared only by choice</small></span></div>
+      <div><span class="trust-icon">♡</span><span><strong>People before technology</strong><small>Clear paths to real-world support</small></span></div>
     </section>
 
-    <section class="section" id="find-help">
+    <section class="section directory-section" id="find-help">
       <div class="section-heading">
-        <p class="eyebrow">HOW CAN WE HELP?</p>
+        <p class="eyebrow">EXPLORE THE DIRECTORY</p>
         <h2>What kind of support are you looking for?</h2>
-        <p>Search in everyday language. You can also browse by the kind of help you need.</p>
+        <p>Search by service, organization, or location. You can narrow results using the filters.</p>
       </div>
-      <form id="search-form" class="search-form" role="search">
-        <label class="sr-only" for="search-input">Search for dementia support</label>
-        <input id="search-input" name="q" type="search" placeholder="Try “caregiver support near me”" autocomplete="off">
-        <button class="button button-primary" type="submit">Search</button>
+      <form id="search-form" class="search-panel" role="search">
+        <div class="search-field search-wide">
+          <label for="search-input">Search</label>
+          <input id="search-input" name="q" type="search" placeholder="e.g. caregiver support, memory clinic, respite care" autocomplete="off">
+        </div>
+        <div class="search-field">
+          <label for="category-filter">Type of help</label>
+          <select id="category-filter" name="category">
+            <option value="">All support types</option>
+            <option value="caregiver-support">Caregiver support</option>
+            <option value="memory-clinic">Memory clinics</option>
+            <option value="respite-care">Respite care</option>
+            <option value="support-group">Support groups</option>
+            <option value="financial-assistance">Financial assistance</option>
+            <option value="helpline">Helplines</option>
+            <option value="professional">Qualified professionals</option>
+          </select>
+        </div>
+        <div class="search-field">
+          <label for="country-filter">Country</label>
+          <input id="country-filter" name="country" type="text" placeholder="e.g. United States">
+        </div>
+        <button class="button button-primary search-submit" type="submit">Search directory</button>
       </form>
-      <div class="quick-links" aria-label="Popular support categories">
+      <div class="quick-links" aria-label="Popular support searches">
         <button type="button" data-query="caregiver support">Caregiver support</button>
         <button type="button" data-query="memory clinic">Memory clinics</button>
         <button type="button" data-query="respite care">Respite care</button>
@@ -67,19 +85,61 @@
         <button type="button" data-query="financial assistance">Financial assistance</button>
         <button type="button" data-query="helpline">Helplines</button>
       </div>
-      <div class="results-heading"><h3>Support resources</h3><span id="result-count">Search to explore the directory</span></div>
+      <div class="results-heading"><div><p class="eyebrow">DIRECTORY RESULTS</p><h3>Support resources</h3></div><span id="result-count" role="status" aria-live="polite">Loading directory…</span></div>
       <div id="results" class="results" aria-live="polite">
-        <div class="empty-state"><span aria-hidden="true">♡</span><p>When resources are added to the directory, they will appear here. Try a search to get started.</p></div>
+        <div class="empty-state"><span aria-hidden="true">♡</span><p>Loading available directory listings…</p></div>
+      </div>
+    </section>
+
+    <section class="professional-band" id="professionals">
+      <div class="professional-copy">
+        <p class="eyebrow">QUALIFIED CARE AND EXPERTISE</p>
+        <h2>Looking for a dementia-qualified professional?</h2>
+        <p>Our professional directory is being developed to help people find clinicians and specialists with relevant credentials. We will show the evidence and the date each credential was checked.</p>
+        <a class="button button-light" href="#find-help" data-professional-search>Explore professional listings <span aria-hidden="true">→</span></a>
+      </div>
+      <div class="professional-points">
+        <div><strong>Credential evidence</strong><span>Licensing and qualifications must be checked against authoritative sources.</span></div>
+        <div><strong>Clear status labels</strong><span>Pending or incomplete checks will never be presented as verified.</span></div>
+        <div><strong>Separate emergency enrollment</strong><span>A directory listing does not mean a professional is on call or accepts emergency requests.</span></div>
+      </div>
+    </section>
+
+    <section class="emergency-section" id="emergency" aria-labelledby="emergency-title">
+      <div class="emergency-panel">
+        <div class="emergency-icon" aria-hidden="true">!</div>
+        <div class="emergency-copy">
+          <p class="eyebrow">IMMEDIATE DANGER?</p>
+          <h2 id="emergency-title">Get emergency help first</h2>
+          <p>If someone is in immediate danger, call your local emergency number now. This directory is not an emergency dispatch service and does not monitor requests.</p>
+          <p class="privacy-note">If it is safe and useful, you can request your device location and choose to share a map link with a trusted person or responder. Your location is not tracked in the background or sent to this directory.</p>
+          <button class="button button-emergency" id="share-location" type="button">Get and share my location</button>
+          <p id="location-status" class="status" role="status" aria-live="polite">Location has not been requested.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="safety-section" id="safety">
+      <div class="section-heading">
+        <p class="eyebrow">OUR COMMITMENT</p>
+        <h2>Technology with boundaries. Help with integrity.</h2>
+        <p>AI may help organize and improve directory information. It does not replace professional judgment or verification.</p>
+      </div>
+      <div class="safety-grid">
+        <article><span>01</span><h3>No invented listings</h3><p>Names, contact details, services, and credentials must come from evidence—not guesses.</p></article>
+        <article><span>02</span><h3>No false verification</h3><p>Only records checked against reliable sources can carry a verified status.</p></article>
+        <article><span>03</span><h3>Privacy by design</h3><p>Sensitive information and precise location are protected and shared only with appropriate permission.</p></article>
+        <article><span>04</span><h3>No unauthorized dispatch</h3><p>Professionals must separately opt in before they can be considered for an emergency network.</p></article>
       </div>
     </section>
 
     <section class="reassurance" id="about">
       <p class="eyebrow">BUILT AROUND PEOPLE</p>
       <h2>Clear information. More confidence. Better support.</h2>
-      <p>We are building a worldwide directory that makes it easier for people affected by dementia to discover helpful services and organizations. Listings will show their verification status so you can make informed choices.</p>
+      <p>Our goal is a worldwide directory that helps people affected by dementia discover legitimate services and qualified help in their country, language, and community.</p>
     </section>
   </main>
-  <footer><span>Global Dementia Support</span><span>Information to help you find your next step.</span></footer>
+  <footer><span>Global Dementia Support</span><span>Information to help you find your next step.</span><a href="#safety">Safety and verification</a></footer>
   <script src="/app.js" defer></script>
 </body>
 </html>
