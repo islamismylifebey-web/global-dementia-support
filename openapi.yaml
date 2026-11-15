@@ -4,7 +4,7 @@ info:
   version: 1.0.0
   description: Search and browse dementia support, care, and assistance resources worldwide.
 servers:
-  - url: https://YOUR-WORKER-SUBDOMAIN.workers.dev
+  - url: https://global-dementia-support-api.beythetruth4ever.workers.dev
 paths:
   /api/v1/health:
     get:
@@ -103,3 +103,66 @@ paths:
       responses:
         "200":
           description: Languages
+
+  /api/v1/professionals:
+    get:
+      summary: Browse active professional profiles
+      description: Returns public professional profiles and separately verified credential evidence. Profiles are not returned when inactive.
+      parameters:
+        - in: query
+          name: q
+          schema: { type: string, maxLength: 120 }
+          description: Search names, titles, organizations, biographies, and locations.
+        - in: query
+          name: country
+          schema: { type: string }
+        - in: query
+          name: region
+          schema: { type: string }
+        - in: query
+          name: city
+          schema: { type: string }
+        - in: query
+          name: specialty
+          schema: { type: string }
+          description: Exact specialty match, case-insensitive.
+        - in: query
+          name: language
+          schema: { type: string }
+          description: Exact language match, case-insensitive.
+        - in: query
+          name: telehealth
+          schema: { type: boolean }
+        - in: query
+          name: verification_status
+          schema:
+            type: string
+            enum: [verified, pending, needs_review]
+        - in: query
+          name: page
+          schema: { type: integer, minimum: 1, default: 1 }
+        - in: query
+          name: limit
+          schema: { type: integer, minimum: 1, maximum: 100, default: 20 }
+      responses:
+        "200":
+          description: Paginated professional profiles with credential evidence.
+  /api/v1/professionals/{id}:
+    get:
+      summary: Get a professional profile and credential evidence
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      responses:
+        "200":
+          description: Professional profile found.
+        "404":
+          description: Professional profile not found.
+  /api/v1/professional-specialties:
+    get:
+      summary: List specialties represented in active professional profiles
+      responses:
+        "200":
+          description: Specialty names.
