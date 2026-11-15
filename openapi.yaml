@@ -1,0 +1,105 @@
+openapi: 3.1.0
+info:
+  title: Global Dementia Support API
+  version: 1.0.0
+  description: Search and browse dementia support, care, and assistance resources worldwide.
+servers:
+  - url: https://YOUR-WORKER-SUBDOMAIN.workers.dev
+paths:
+  /api/v1/health:
+    get:
+      summary: Check API and database health
+      responses:
+        "200":
+          description: API and database are available
+  /api/v1/resources:
+    get:
+      summary: Browse resources
+      parameters:
+        - in: query
+          name: q
+          schema: { type: string }
+        - in: query
+          name: country
+          schema: { type: string }
+        - in: query
+          name: region
+          schema: { type: string }
+        - in: query
+          name: city
+          schema: { type: string }
+        - in: query
+          name: category
+          schema: { type: string }
+        - in: query
+          name: language
+          schema: { type: string }
+        - in: query
+          name: service
+          schema: { type: string }
+        - in: query
+          name: verification_status
+          schema:
+            type: string
+            enum: [verified, pending, needs_review]
+        - in: query
+          name: page
+          schema: { type: integer, minimum: 1, default: 1 }
+        - in: query
+          name: limit
+          schema: { type: integer, minimum: 1, maximum: 100, default: 20 }
+      responses:
+        "200":
+          description: Paginated resources
+  /api/v1/resources/{id}:
+    get:
+      summary: Get a resource by ID
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      responses:
+        "200":
+          description: Resource found
+        "404":
+          description: Resource not found
+  /api/v1/search:
+    get:
+      summary: Search resources
+      parameters:
+        - in: query
+          name: q
+          required: true
+          schema: { type: string }
+      responses:
+        "200":
+          description: Search results
+  /api/v1/categories:
+    get:
+      summary: List categories currently represented
+      responses:
+        "200":
+          description: Categories
+  /api/v1/countries:
+    get:
+      summary: List countries currently represented
+      responses:
+        "200":
+          description: Countries
+  /api/v1/locations:
+    get:
+      summary: List locations currently represented
+      parameters:
+        - in: query
+          name: country
+          schema: { type: string }
+      responses:
+        "200":
+          description: Locations
+  /api/v1/languages:
+    get:
+      summary: List languages currently represented
+      responses:
+        "200":
+          description: Languages
