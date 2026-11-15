@@ -154,6 +154,23 @@ async function listResources(url: URL, env: Env): Promise<Response> {
     bindings.push(service);
   }
 
+  const latitudeValue = url.searchParams.get("lat");
+  const longitudeValue = url.searchParams.get("lng");
+  if (latitudeValue !== null || longitudeValue !== null) {
+    const latitude = Number(latitudeValue);
+    const longitude = Number(longitudeValue);
+    if (!Number.isFinite(latitude) || latitude < -90 || latitude > 90 ||
+        !Number.isFinite(longitude) || longitude < -180 || longitude > 180) {
+      return error("Provide valid latitude and longitude for nearby search.", 400, "INVALID_LOCATION");
+    }
+    const radiusValue = Number(url.searchParams.get("radius_km") ?? "25");
+    const radiusKm = Number.isFinite(radiusValue) ? Math.min(250, Math.max(1, radiusValue)) : 25;
+    const latitudeDelta = radiusKm / 111.32;
+    const longitudeDelta = radiusKm / (111.32 * Math.max(Math.abs(Math.cos(latitude * Math.PI / 180)), 0.01));
+    clauses.push("latitude IS NOT NULL AND longitude IS NOT NULL AND latitude BETWEEN ? AND ? AND longitude BETWEEN ? AND ?");
+    bindings.push(latitude - latitudeDelta, latitude + latitudeDelta, longitude - longitudeDelta, longitude + longitudeDelta);
+  }
+
   const where = clauses.length ? `WHERE ${clauses.join(" AND ")}` : "";
   const countRow = await env.DB.prepare(
     `SELECT COUNT(*) AS total FROM resources ${where}`
