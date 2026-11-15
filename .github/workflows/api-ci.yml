@@ -1,0 +1,21 @@
+name: API checks
+
+on: [push, pull_request]
+
+permissions:
+  contents: read
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund
+      - name: Type-check the Worker
+        run: npm run typecheck
+      - name: Validate D1 migrations
+        run: python scripts/validate-migrations.py

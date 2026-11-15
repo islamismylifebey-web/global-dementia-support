@@ -29,6 +29,9 @@ A worldwide directory of dementia support, care, and assistance resources. The p
 | GET | `/api/v1/countries` | List countries represented in the directory |
 | GET | `/api/v1/locations?country=...` | List locations |
 | GET | `/api/v1/languages` | List supported languages |
+| GET | `/api/v1/professionals` | Browse active professional profiles with filters and pagination |
+| GET | `/api/v1/professionals/:id` | Get a professional profile and its credential evidence |
+| GET | `/api/v1/professional-specialties` | List specialties currently represented in professional profiles |
 
 ### Resource filters
 
@@ -55,6 +58,36 @@ Requirements: Node.js 20+ and a Cloudflare account for remote deployment.
 5. Start the Worker: `npm run dev`
 
 Before deploying, create the production D1 database, update its ID in `wrangler.toml`, and apply the migration remotely with `npm run db:migrate:remote`.
+
+## Professional directory API
+
+The professional endpoints are being added in the `feat/professional-directory-api` branch. They become available after the database migration is applied and the Worker is deployed.
+
+Browse professionals:
+
+`GET /api/v1/professionals?q=geriatrician&country=United%20States&specialty=dementia-care&language=English&telehealth=true&page=1&limit=20`
+
+Supported filters:
+
+- `q`: matches a professional's name, title, organization, biography, or location
+- `country`, `region`, `city`: location filters
+- `specialty`: exact specialty match, case-insensitive
+- `language`: exact language match, case-insensitive
+- `telehealth`: `true` or `false`
+- `verification_status`: `verified`, `pending`, or `needs_review`
+- `page` and `limit`: pagination; the maximum limit is 100
+
+Get one profile:
+
+`GET /api/v1/professionals/{id}`
+
+List specialties:
+
+`GET /api/v1/professional-specialties`
+
+Each profile includes its public contact information, location, specialties, languages, services, telehealth availability, profile verification dates, and credential evidence. Each credential has its own status, issuing authority, jurisdiction, evidence URL, and last-checked date.
+
+**Verification rule:** a submitted credential is a claim, not proof. A profile must not be labeled verified until the relevant credential(s) have been checked against an authoritative licensing board, regulator, or issuing organization. Never invent an authority, credential, source URL, or check date. Only publish contact information intended for public professional inquiries.
 
 ## Data quality and safety
 
