@@ -3,7 +3,11 @@ const results = document.querySelector("#results");
 const resultCount = document.querySelector("#result-count");
 const searchInput = document.querySelector("#search-input");
 const categoryFilter = document.querySelector("#category-filter");
+const languageFilter = document.querySelector("#language-filter");
 const countryFilter = document.querySelector("#country-filter");
+const nearMeButton = document.querySelector("#near-me-button");
+const nearMeStatus = document.querySelector("#near-me-status");
+let nearMeCoordinates = null;
 
 function escapeHtml(value) {
   return String(value ?? "").replace(/[&<>"']/g, (char) => ({
@@ -50,7 +54,13 @@ async function searchResources() {
   const params = new URLSearchParams({ page: "1", limit: "20" });
   if (searchInput.value.trim()) params.set("q", searchInput.value.trim());
   if (categoryFilter.value) params.set("category", categoryFilter.value);
+  if (languageFilter.value) params.set("language", languageFilter.value);
   if (countryFilter.value.trim()) params.set("country", countryFilter.value.trim());
+  if (nearMeCoordinates) {
+    params.set("lat", String(nearMeCoordinates.latitude));
+    params.set("lng", String(nearMeCoordinates.longitude));
+    params.set("radius_km", "25");
+  }
   results.innerHTML = '<div class="empty-state"><p>Searching the directory…</p></div>';
   resultCount.textContent = "Loading";
   try {
@@ -89,6 +99,40 @@ document.querySelectorAll("[data-query]").forEach((button) => {
 document.querySelector("[data-professional-search]").addEventListener("click", () => {
   categoryFilter.value = "professional";
   searchResources();
+});
+
+nearMeButton.addEventListener("click", () => {
+  if (nearMeCoordinates) {
+    nearMeCoordinates = null;
+    nearMeButton.textContent = "Use my location";
+    nearMeStatus.textContent = "Nearby filter cleared. No location is being used for this search.";
+    searchResources();
+    return;
+  }
+  if (!navigator.geolocation) {
+    nearMeStatus.textContent = "This browser does not support location. You can enter a country or location in the search instead.";
+    return;
+  }
+  nearMeButton.disabled = true;
+  nearMeStatus.textContent = "Asking your browser for permission to use your location…";
+  navigator.geolocation.getCurrentPosition((position) => {
+    nearMeCoordinates = {
+      latitude: position.coords.latitude,
+      longitude: position.coords.longitude
+    };
+    nearMeButton.disabled = false;
+    nearMeButton.textContent = "Clear nearby filter";
+    nearMeStatus.textContent = "Nearby search is on (approximate 25 km area). Coordinates are sent with this search request only and are not saved in your profile.";
+    searchResources();
+  }, (error) => {
+    const messages = {
+      1: "Location permission was denied. You can still search by entering a country or location.",
+      2: "Your device could not determine its location. Try again or search by country.",
+      3: "The location request timed out. Try again or search by country."
+    };
+    nearMeStatus.textContent = messages[error.code] || "We could not get your location.";
+    nearMeButton.disabled = false;
+  }, { enableHighAccuracy: false, timeout: 12000, maximumAge: 60000 });
 });
 
 const locationButton = document.querySelector("#share-location");
