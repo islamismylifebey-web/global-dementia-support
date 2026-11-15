@@ -1,0 +1,12 @@
+name = "global-dementia-support-api"
+main = "src/index.ts"
+compatibility_date = "2026-11-14"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "global-dementia-support-db"
+database_id = "REPLACE_WITH_YOUR_D1_DATABASE_ID"
+migrations_dir = "migrations"
+
+[vars]
+API_VERSION = "v1"
