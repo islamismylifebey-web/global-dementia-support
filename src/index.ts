@@ -259,6 +259,10 @@ async function handleRequest(request: Request, env: Env): Promise<Response> {
 
 export default {
   fetch(request: Request, env: Env): Promise<Response> {
-    const url = new URL(request.url);\n    if (!url.pathname.startsWith("/api/") && request.method === "GET") {\n      return env.ASSETS.fetch(request);\n    }\n    return handleRequest(request, env);
+    const url = new URL(request.url);
+    if (!url.pathname.startsWith("/api/") && request.method === "GET") {
+      return env.ASSETS.fetch(request);
+    }
+    return handleRequest(request, env);
   }
 };
