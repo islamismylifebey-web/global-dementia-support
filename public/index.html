@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f7f8f5">
+  <meta name="description" content="Find dementia support, care, and trusted help around the world.">
+  <title>Global Dementia Support</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to main content</a>
+  <header class="site-header">
+    <a class="brand" href="/" aria-label="Global Dementia Support home">
+      <span class="brand-mark" aria-hidden="true">G</span>
+      <span>Global Dementia <strong>Support</strong></span>
+    </a>
+    <nav aria-label="Main navigation">
+      <a href="#find-help">Find help</a>
+      <a href="#emergency">Emergency help</a>
+      <a href="#about">About</a>
+    </nav>
+  </header>
+
+  <main id="main">
+    <section class="hero">
+      <div class="hero-copy">
+        <p class="eyebrow">YOU ARE NOT ALONE</p>
+        <h1>Find the right support.<br><span>One step at a time.</span></h1>
+        <p class="hero-intro">A welcoming place to find dementia information, caregiver support, local services, and organizations you can trust.</p>
+        <a class="button button-primary" href="#find-help">Find support <span aria-hidden="true">→</span></a>
+      </div>
+      <div class="hero-art" aria-hidden="true">
+        <div class="sun"></div><div class="art-card"><span>Care</span><span>Connection</span><span>Community</span></div>
+        <div class="art-leaf leaf-one"></div><div class="art-leaf leaf-two"></div>
+      </div>
+    </section>
+
+    <section class="emergency-panel" id="emergency" aria-labelledby="emergency-title">
+      <div class="emergency-icon" aria-hidden="true">!</div>
+      <div class="emergency-copy">
+        <p class="eyebrow">NEED URGENT HELP?</p>
+        <h2 id="emergency-title">Share your location in an emergency</h2>
+        <p>If someone is in immediate danger, call your local emergency number first. You can choose to get your current location and share it with a trusted person or responder.</p>
+        <p class="privacy-note">Your location is not tracked in the background or sent to this directory. Your browser will ask permission when you press the button.</p>
+        <button class="button button-emergency" id="share-location" type="button">Get and share my location</button>
+        <p id="location-status" class="status" role="status" aria-live="polite">Location has not been requested.</p>
+      </div>
+    </section>
+
+    <section class="section" id="find-help">
+      <div class="section-heading">
+        <p class="eyebrow">HOW CAN WE HELP?</p>
+        <h2>What kind of support are you looking for?</h2>
+        <p>Search in everyday language. You can also browse by the kind of help you need.</p>
+      </div>
+      <form id="search-form" class="search-form" role="search">
+        <label class="sr-only" for="search-input">Search for dementia support</label>
+        <input id="search-input" name="q" type="search" placeholder="Try “caregiver support near me”" autocomplete="off">
+        <button class="button button-primary" type="submit">Search</button>
+      </form>
+      <div class="quick-links" aria-label="Popular support categories">
+        <button type="button" data-query="caregiver support">Caregiver support</button>
+        <button type="button" data-query="memory clinic">Memory clinics</button>
+        <button type="button" data-query="respite care">Respite care</button>
+        <button type="button" data-query="support groups">Support groups</button>
+        <button type="button" data-query="financial assistance">Financial assistance</button>
+        <button type="button" data-query="helpline">Helplines</button>
+      </div>
+      <div class="results-heading"><h3>Support resources</h3><span id="result-count">Search to explore the directory</span></div>
+      <div id="results" class="results" aria-live="polite">
+        <div class="empty-state"><span aria-hidden="true">♡</span><p>When resources are added to the directory, they will appear here. Try a search to get started.</p></div>
+      </div>
+    </section>
+
+    <section class="reassurance" id="about">
+      <p class="eyebrow">BUILT AROUND PEOPLE</p>
+      <h2>Clear information. More confidence. Better support.</h2>
+      <p>We are building a worldwide directory that makes it easier for people affected by dementia to discover helpful services and organizations. Listings will show their verification status so you can make informed choices.</p>
+    </section>
+  </main>
+  <footer><span>Global Dementia Support</span><span>Information to help you find your next step.</span></footer>
+  <script src="/app.js" defer></script>
+</body>
+</html>
