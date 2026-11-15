@@ -10,3 +10,4 @@ migrations_dir = "migrations"
 
 [vars]
 API_VERSION = "v1"
+\n[assets]\ndirectory = "./public"\nbinding = "ASSETS"\nrun_worker_first = ["/api/*"]\n
