@@ -1,54 +1,21 @@
 name: API checks
 
-on:
-  pull_request:
-  push:
-    branches:
-      - main
-      - "feat/**"
+on: [push, pull_request]
 
 permissions:
   contents: read
 
 jobs:
-  typecheck-and-migrations:
+  checks:
     runs-on: ubuntu-latest
     steps:
-      - name: Check out repository
-        uses: actions/checkout@v4
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: "20"
       - name: Install dependencies
         run: npm install --no-audit --no-fund
       - name: Type-check the Worker
         run: npm run typecheck
-      - name: Validate D1 migration SQL
-        run: |
-          python - <<'PY'
-          from pathlib import Path
-          import sqlite3
-
-          db = sqlite3.connect(":memory:")
-          db.execute("PRAGMA foreign_keys = ON")
-          for migration in sorted(Path("migrations").glob("*.sql")):
-              db.executescript(migration.read_text(encoding="utf-8"))
-              print(f"Validated {migration}")
-          tables = {
-              row[0]
-              for row in db.execute(
-                  "SELECT name FROM sqlite_master WHERE type = 'table'"
-              )
-          }
-          required = {
-              "resources",
-              "resource_reports",
-              "professional_profiles",
-              "professional_credentials",
-          }
-          missing = required - tables
-          if missing:
-              raise SystemExit(f"Missing tables after migrations: {sorted(missing)}")
-          print("All required directory tables are present.")
-          PY
+      - name: Validate D1 migrations
+        run: python scripts/validate-migrations.py
