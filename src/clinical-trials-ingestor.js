@@ -1,7 +1,18 @@
 export default {
   async fetch() { return new Response("Dementia research ingestion runs on a scheduled trigger.", {status: 200}); },
-  async scheduled(event, env, ctx) { ctx.waitUntil(ingest(env)); }
+  async scheduled(event, env, ctx) { ctx.waitUntil(runWithAudit(env)); }
 };
+async function runWithAudit(env) {
+  const inserted = await env.DB.prepare("INSERT INTO ingestion_runs(source_id,status) VALUES ('clinicaltrials','running')").run();
+  const runId = inserted.meta.last_row_id;
+  try {
+    const count = await ingest(env);
+    await env.DB.prepare("UPDATE ingestion_runs SET status='success',records_processed=?,finished_at=strftime('%Y-%m-%dT%H:%M:%fZ','now') WHERE id=?").bind(count,runId).run();
+  } catch (error) {
+    await env.DB.prepare("UPDATE ingestion_runs SET status='failed',error_message=?,finished_at=strftime('%Y-%m-%dT%H:%M:%fZ','now') WHERE id=?").bind(String(error).slice(0,1000),runId).run();
+    throw error;
+  }
+}
 async function ingest(env) {
   const url = new URL("https://clinicaltrials.gov/api/v2/studies");
   url.searchParams.set("query.cond", "dementia OR Alzheimer Disease");
@@ -30,10 +41,11 @@ async function ingest(env) {
       .bind(id,title,status.overallStatus || "UNKNOWN",JSON.stringify(conditions),
         JSON.stringify(p.designModule?.phases || []),p.designModule?.studyType || null,
         p.descriptionModule?.briefSummary || null,"https://clinicaltrials.gov/study/"+id,
-        status.studyFirstPostDateStruct?.date || status.lastUpdatePostDateStruct?.date || null,
+        status.lastUpdatePostDateStruct?.date || null,
         JSON.stringify(contacts)).run();
     count++;
   }
   await env.DB.prepare("UPDATE data_sources SET import_status='active',last_import_at=strftime('%Y-%m-%dT%H:%M:%fZ','now'),notes=? WHERE id='clinicaltrials'")
     .bind("Scheduled ingestion; latest " + count + " studies fetched per run; sourced from ClinicalTrials.gov").run();
+  return count;
 }
