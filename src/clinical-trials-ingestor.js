@@ -38,8 +38,23 @@ async function ingest(env) {
   url.searchParams.set("sort", "LastUpdatePostDate:desc");
   if (state?.page_token) url.searchParams.set("pageToken", state.page_token);
 
-  const response = await fetch(url, { headers: { "Accept": "application/json" } });
-  if (!response.ok) throw new Error("ClinicalTrials.gov HTTP " + response.status);
+  const requestHeaders = { "Accept": "application/json" };
+  let response = await fetch(url, { headers: requestHeaders });
+  let restartedPagination = false;
+  if (response.status === 400 && state?.page_token) {
+    const detail = await response.text();
+    // ClinicalTrials.gov invalidates page tokens when matching studies change.
+    if (/start over from the first page|changed while you were paginating/i.test(detail)) {
+      // Invalidate only the pagination cursor; never delete study rows.
+      await env.DB.prepare("UPDATE ingestion_cursors SET page_token=NULL,updated_at=strftime('%Y-%m-%dT%H:%M:%fZ','now') WHERE source_id='clinicaltrials'").run();
+      url.searchParams.delete("pageToken");
+      restartedPagination = true;
+      response = await fetch(url, { headers: requestHeaders });
+    } else {
+      throw new Error("ClinicalTrials.gov HTTP 400: " + detail.slice(0, 400));
+    }
+  }
+  if (!response.ok) throw new Error("ClinicalTrials.gov HTTP " + response.status + ": " + (await response.text()).slice(0, 400));
   const body = await response.json();
   if (!Array.isArray(body.studies) || body.studies.length === 0) {
     throw new Error("ClinicalTrials.gov returned no studies; cursor not advanced");
@@ -89,6 +104,6 @@ async function ingest(env) {
   ).bind(body.nextPageToken || null).run();
   await env.DB.prepare(
     "UPDATE data_sources SET import_status='active',last_import_at=strftime('%Y-%m-%dT%H:%M:%fZ','now'),notes=? WHERE id='clinicaltrials'"
-  ).bind("Paginated ClinicalTrials.gov ingestion; last batch: " + statements.length + " studies").run();
+  ).bind("Paginated ClinicalTrials.gov ingestion; last batch: " + statements.length + " studies" + (restartedPagination ? "; restarted after expired pagination token" : "")).run();
   return statements.length;
 }
