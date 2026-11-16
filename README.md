@@ -44,6 +44,23 @@ The resources and search endpoints support:
 
 Example: `/api/v1/resources?country=United%20States&category=caregiver-support&page=1&limit=20`
 
+## Free ClinicalTrials.gov data ingestion
+
+The separate Cloudflare Worker `global-dementia-ingestor` imports public dementia/Alzheimer's study records directly from the ClinicalTrials.gov API v2. No API key is required.
+
+- Production D1 table: `clinical_trials`, keyed by the official `nct_id`.
+- Scheduled trigger: `*/5 * * * *` (every five minutes during initial backfill).
+- Each run processes up to 100 studies; `ingestion_cursors` stores `nextPageToken` to advance to the following page.
+- `ingestion_runs` stores execution status, study counts, timestamps, and any errors.
+- `data_sources` tracks the latest successful import for the `clinicaltrials` source.
+- Inserts use UPSERT by NCT ID to avoid duplicate study entries.
+- Source record URLs use `https://clinicaltrials.gov/study/{NCT_ID}`.
+- The `clinical_trials` dataset is distinct from the `resources` directory; resource listings are not automatically verified by a clinical-trial import.
+
+As of November 15, 2026, the live database contains 100 unique clinical study records and the first two scheduled runs have succeeded. More historical records will be imported page by page by the cron Worker. The public API does not yet expose a clinical trials search endpoint.
+
+Source code: `src/clinical-trials-ingestor.js`. Database migrations: `migrations/0002_clinical_trials.sql` and `migrations/0003_ingestion_cursors.sql`.
+
 ## Run locally
 
 Requirements: Node.js 20+ and a Cloudflare account for remote deployment.
