@@ -65,7 +65,7 @@ async function ingest(env) {
     const p = study.protocolSection || {};
     const id = p.identificationModule?.nctId;
     const title = p.identificationModule?.briefTitle;
-    if (!/^NCT\\d{8}$/.test(id || "") || !title) continue;
+    if (!/^NCT\d{8}$/.test(id || "") || !title) continue;
     const status = p.statusModule || {};
     statements.push(env.DB.prepare(insert).bind(
       id,
