@@ -1,0 +1,13 @@
+name = "global-dementia-assistance-ingestor"
+main = "src/assistance-ingestor.js"
+compatibility_date = "2026-11-14"
+workers_dev = false
+preview_urls = false
+
+[triggers]
+crons = ["15 4 * * *"]
+
+[[d1_databases]]
+binding = "DB"
+database_name = "global-dementia-support-db"
+database_id = "741d4e49-e2b5-422d-be71-5b9a6553af19"
