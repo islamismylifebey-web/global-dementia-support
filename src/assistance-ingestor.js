@@ -33,7 +33,7 @@ const upsert = `INSERT INTO resources
 async function fetchListing(path) {
   const response = await fetch(GOVUK + "/api/content" + path, {
     headers: { Accept: "application/json" },
-    redirect: "error",
+    redirect: "manual",
     signal: AbortSignal.timeout(15000),
   });
   if (!response.ok) throw new Error(`${path}: HTTP ${response.status}`);
