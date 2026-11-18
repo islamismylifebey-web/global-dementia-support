@@ -132,12 +132,19 @@ async function ingest(env, profile) {
   }
   if (statements.length === 0) throw new Error("No valid NCT study records to import");
 
-  const slots = studyIds.map(() => "?").join(",");
-  const existing = await env.DB.prepare("SELECT nct_id FROM clinical_trials WHERE nct_id IN (" + slots + ")").bind(...studyIds).all();
-  const existingSet = new Set(existing.results.map(row => row.nct_id));
+  const existingSet = new Set();
+  // Cloudflare D1 limits SQL bind variables, so read IDs in chunks of 50.
+  for (let i = 0; i < studyIds.length; i += 50) {
+    const ids = studyIds.slice(i, i + 50);
+    const slots = ids.map(() => "?").join(",");
+    const existing = await env.DB.prepare("SELECT nct_id FROM clinical_trials WHERE nct_id IN (" + slots + ")").bind(...ids).all();
+    for (const row of existing.results) existingSet.add(row.nct_id);
+  }
   const newlyAdded = studyIds.filter(id => !existingSet.has(id)).length;
-  // D1 batch writes are transactional; do not advance the cursor before they succeed.
-  await env.DB.batch(statements);
+  // Each batch is atomic. If a later batch fails the cursor stays put and UPSERT safely retries.
+  for (let i = 0; i < statements.length; i += 50) {
+    await env.DB.batch(statements.slice(i, i + 50));
+  }
   await env.DB.prepare(
     "UPDATE ingestion_cursors SET page_token=?,batches_completed=batches_completed+1,completed_at=?,last_total_count=COALESCE(?,last_total_count),updated_at=strftime('%Y-%m-%dT%H:%M:%fZ','now') WHERE source_id=?"
   ).bind(body.nextPageToken || null, body.nextPageToken ? null : new Date().toISOString(), body.totalCount ?? null, profile.id).run();
