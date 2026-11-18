@@ -2,6 +2,12 @@
 
 A worldwide directory of dementia support, care, and assistance resources. The project is designed to help people affected by dementia find trustworthy organizations and services in their country, language, and community.
 
+### Financial assistance import
+
+The assistance Worker refreshes a curated list of UK benefit and cost-support pages daily from the GOV.UK Content API. It writes source-linked listings to the directory's `financial-assistance` category and logs processed and newly added records in `ingestion_runs` under `govuk-assistance`. New listings start as pending verification. Eligibility and geographic coverage vary by program. Follow the GOV.UK link on each listing for the current rules.
+
+Deploy the importer with `npx wrangler deploy --config wrangler.assistance.toml`. It uses the directory's D1 database and its existing `resources`, `data_sources`, and `ingestion_runs` tables.
+
 ## Project status
 
 **Phase 3: First public deployment.** The responsive public interface and read-only REST API are deployed together on Cloudflare Workers. The homepage includes a plain-language dementia support search, type-of-help and language filters, optional nearby search, professional discovery, verification labels, consent-based emergency location sharing, and visible safety commitments. The D1 database is connected but currently contains **0 resource records**. No verified professional dataset or emergency-response enrollment network is populated yet.
