@@ -49,17 +49,19 @@ Example: `/api/v1/resources?country=United%20States&category=caregiver-support&p
 The separate Cloudflare Worker `global-dementia-ingestor` imports public dementia/Alzheimer's study records directly from the ClinicalTrials.gov API v2. No API key is required.
 
 - Production D1 table: `clinical_trials`, keyed by the official `nct_id`.
-- Scheduled trigger: `*/5 * * * *` (every five minutes during initial backfill).
-- Each run processes up to 100 studies; `ingestion_cursors` stores `nextPageToken` to advance to the following page.
-- `ingestion_runs` stores execution status, study counts, timestamps, and any errors.
+- Scheduled trigger: `*/5 * * * *` (every five minutes during initial backfill); completed searches pause until their refresh interval.
+- Each run processes up to 250 studies; `ingestion_cursors` stores `nextPageToken`, completed scans, and the source-reported match count. Search profiles cover Alzheimer's/dementia, mild cognitive impairment, frontotemporal conditions, Lewy body conditions, and vascular/Parkinson-related dementia.
+- `ingestion_runs` stores execution status, processed records, **genuinely new records** (`records_new`), timestamps, and errors. Older runs predate accurate new-record counting.
 - `data_sources` tracks the latest successful import for the `clinicaltrials` source.
 - Inserts use UPSERT by NCT ID to avoid duplicate study entries.
 - Source record URLs use `https://clinicaltrials.gov/study/{NCT_ID}`.
 - The `clinical_trials` dataset is distinct from the `resources` directory; resource listings are not automatically verified by a clinical-trial import.
 
-As of November 15, 2026, the live database contains 100 unique clinical study records and the first two scheduled runs have succeeded. More historical records will be imported page by page by the cron Worker. The public API does not yet expose a clinical trials search endpoint.
+As of November 17, 2026 (verified directly in production D1), the database contains **6,996 unique clinical studies**. Earlier importer runs repeatedly reprocessed existing records, so records processed must never be interpreted as newly added studies. The expanded search profiles were deployed November 17 and new-record yields must be verified from subsequent runs.
 
-Source code: `src/clinical-trials-ingestor.js`. Database migrations: `migrations/0002_clinical_trials.sql` and `migrations/0003_ingestion_cursors.sql`.
+**Public research browser:** https://dementia-research.galorweb.works/ — deployed as `global-dementia-trials-api`, with free research search, pagination, status filtering and detail views. Its read-only endpoints are `/api/v1/trials`, `/api/v1/trials/stats` and `/api/v1/trials/{NCT_ID}`. The main directory website links to it from homepage navigation, the hero and footer.
+
+Source code: `src/clinical-trials-ingestor.js`. Database migrations: `migrations/0002_clinical_trials.sql`, `migrations/0003_ingestion_cursors.sql` and `migrations/0004_ingestion_efficiency.sql`.
 
 ## Run locally
 
