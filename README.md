@@ -4,7 +4,11 @@ A worldwide directory of dementia support, care, and assistance resources. The p
 
 ### Financial assistance import
 
-The assistance Worker refreshes a curated list of UK benefit and cost-support pages daily from the GOV.UK Content API. It writes source-linked listings to the directory's `financial-assistance` category and logs processed and newly added records in `ingestion_runs` under `govuk-assistance`. New listings start as pending verification. Eligibility and geographic coverage vary by program. Follow the GOV.UK link on each listing for the current rules.
+The assistance Worker refreshes UK benefit and cost-support pages daily. It discovers candidates through GOV.UK search, with the official disability benefits topic page as a fallback, and retrieves the source page through the Content API. It publishes a bounded batch of matching programs, deduplicates known URLs, and links to official eligibility and claim guidance where available. New listings start as pending verification. Withdrawn or missing source pages for existing listings are flagged for review.
+
+A second daily schedule checks Medicaid.gov state contacts, the SHIP locator, 211 Canada's regional provider index, and Alzheimer's Disease International member profiles. These checks update existing directory IDs and add new published entries. Missing entries from a successfully parsed directory are flagged for review. Directory coverage checks prevent an incomplete response from marking a whole feed missing.
+
+`ingestion_runs` records processed rows, new rows, and errors. The latest update and review counts are in `data_sources.notes`. Regional 211 provider links are public referral records. Individual 211 services require an authorized directory export.
 
 Deploy the importer with `npx wrangler deploy --config wrangler.assistance.toml`. It uses the directory's D1 database and its existing `resources`, `data_sources`, and `ingestion_runs` tables.
 
