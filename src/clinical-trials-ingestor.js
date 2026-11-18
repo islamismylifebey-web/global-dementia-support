@@ -9,16 +9,39 @@ export default {
   }
 };
 
+const SEARCH_PROFILES = [
+  { id: "clinicaltrials", condition: "dementia OR Alzheimer Disease", refreshHours: 24 },
+  { id: "clinicaltrials:mci", condition: "Mild Cognitive Impairment", refreshHours: 168 },
+  { id: "clinicaltrials:frontotemporal", condition: "Frontotemporal Dementia OR Primary Progressive Aphasia", refreshHours: 168 },
+  { id: "clinicaltrials:lewy", condition: "Dementia with Lewy Bodies OR Lewy Body Dementia", refreshHours: 168 },
+  { id: "clinicaltrials:vascular", condition: "Vascular Dementia OR Parkinson Disease Dementia", refreshHours: 168 }
+];
+async function nextProfile(env) {
+  for (const profile of SEARCH_PROFILES) {
+    await env.DB.prepare("INSERT OR IGNORE INTO ingestion_cursors (source_id,page_token) VALUES (?,NULL)").bind(profile.id).run();
+    const state = await env.DB.prepare("SELECT completed_at FROM ingestion_cursors WHERE source_id=?").bind(profile.id).first();
+    if (state?.completed_at) {
+      const elapsed = Date.now() - Date.parse(state.completed_at);
+      if (Number.isFinite(elapsed) && elapsed < profile.refreshHours * 3600000) continue;
+      await env.DB.prepare("UPDATE ingestion_cursors SET completed_at=NULL WHERE source_id=?").bind(profile.id).run();
+    }
+    return profile;
+  }
+  return null;
+}
+
 async function runWithAudit(env) {
+  const profile = await nextProfile(env);
+  if (!profile) return;
   const result = await env.DB.prepare(
-    "INSERT INTO ingestion_runs(source_id,status) VALUES ('clinicaltrials','running')"
-  ).run();
+    "INSERT INTO ingestion_runs(source_id,status) VALUES (?,'running')"
+  ).bind(profile.id).run();
   const runId = result.meta.last_row_id;
   try {
-    const count = await ingest(env);
+    const { processed, newlyAdded } = await ingest(env, profile);
     await env.DB.prepare(
-      "UPDATE ingestion_runs SET status='success',records_processed=?,finished_at=strftime('%Y-%m-%dT%H:%M:%fZ','now') WHERE id=?"
-    ).bind(count, runId).run();
+      "UPDATE ingestion_runs SET status='success',records_processed=?,records_new=?,finished_at=strftime('%Y-%m-%dT%H:%M:%fZ','now') WHERE id=?"
+    ).bind(processed, newlyAdded, runId).run();
   } catch (error) {
     await env.DB.prepare(
       "UPDATE ingestion_runs SET status='failed',error_message=?,finished_at=strftime('%Y-%m-%dT%H:%M:%fZ','now') WHERE id=?"
@@ -27,14 +50,15 @@ async function runWithAudit(env) {
   }
 }
 
-async function ingest(env) {
+async function ingest(env, profile) {
   const state = await env.DB.prepare(
-    "SELECT page_token FROM ingestion_cursors WHERE source_id='clinicaltrials'"
-  ).first();
+    "SELECT page_token FROM ingestion_cursors WHERE source_id=?"
+  ).bind(profile.id).first();
 
   const url = new URL("https://clinicaltrials.gov/api/v2/studies");
-  url.searchParams.set("query.cond", "dementia OR Alzheimer Disease");
-  url.searchParams.set("pageSize", "100");
+  url.searchParams.set("query.cond", profile.condition);
+  url.searchParams.set("countTotal", "true");
+  url.searchParams.set("pageSize", "250");
   url.searchParams.set("sort", "LastUpdatePostDate:desc");
   if (state?.page_token) url.searchParams.set("pageToken", state.page_token);
 
@@ -46,7 +70,7 @@ async function ingest(env) {
     // ClinicalTrials.gov invalidates page tokens when matching studies change.
     if (/start over from the first page|changed while you were paginating/i.test(detail)) {
       // Invalidate only the pagination cursor; never delete study rows.
-      await env.DB.prepare("UPDATE ingestion_cursors SET page_token=NULL,updated_at=strftime('%Y-%m-%dT%H:%M:%fZ','now') WHERE source_id='clinicaltrials'").run();
+      await env.DB.prepare("UPDATE ingestion_cursors SET page_token=NULL,updated_at=strftime('%Y-%m-%dT%H:%M:%fZ','now') WHERE source_id=?").bind(profile.id).run();
       url.searchParams.delete("pageToken");
       restartedPagination = true;
       response = await fetch(url, { headers: requestHeaders });
@@ -76,11 +100,13 @@ async function ingest(env) {
       updated_at=excluded.updated_at`;
 
   const statements = [];
+  const studyIds = [];
   for (const study of body.studies) {
     const p = study.protocolSection || {};
     const id = p.identificationModule?.nctId;
     const title = p.identificationModule?.briefTitle;
     if (!/^NCT\d{8}$/.test(id || "") || !title) continue;
+    studyIds.push(id);
     const status = p.statusModule || {};
     statements.push(env.DB.prepare(insert).bind(
       id,
@@ -97,13 +123,17 @@ async function ingest(env) {
   }
   if (statements.length === 0) throw new Error("No valid NCT study records to import");
 
+  const slots = studyIds.map(() => "?").join(",");
+  const existing = await env.DB.prepare("SELECT nct_id FROM clinical_trials WHERE nct_id IN (" + slots + ")").bind(...studyIds).all();
+  const existingSet = new Set(existing.results.map(row => row.nct_id));
+  const newlyAdded = studyIds.filter(id => !existingSet.has(id)).length;
   // D1 batch writes are transactional; do not advance the cursor before they succeed.
   await env.DB.batch(statements);
   await env.DB.prepare(
-    "UPDATE ingestion_cursors SET page_token=?,batches_completed=batches_completed+1,updated_at=strftime('%Y-%m-%dT%H:%M:%fZ','now') WHERE source_id='clinicaltrials'"
-  ).bind(body.nextPageToken || null).run();
+    "UPDATE ingestion_cursors SET page_token=?,batches_completed=batches_completed+1,completed_at=?,last_total_count=COALESCE(?,last_total_count),updated_at=strftime('%Y-%m-%dT%H:%M:%fZ','now') WHERE source_id=?"
+  ).bind(body.nextPageToken || null, body.nextPageToken ? null : new Date().toISOString(), body.totalCount ?? null, profile.id).run();
   await env.DB.prepare(
     "UPDATE data_sources SET import_status='active',last_import_at=strftime('%Y-%m-%dT%H:%M:%fZ','now'),notes=? WHERE id='clinicaltrials'"
-  ).bind("Paginated ClinicalTrials.gov ingestion; last batch: " + statements.length + " studies" + (restartedPagination ? "; restarted after expired pagination token" : "")).run();
-  return statements.length;
+  ).bind("Profile: " + profile.id + "; processed: " + statements.length + "; genuinely new: " + newlyAdded + (body.nextPageToken ? "" : "; completed full scan") + (restartedPagination ? "; restarted after expired pagination token" : "")).run();
+  return { processed: statements.length, newlyAdded };
 }
