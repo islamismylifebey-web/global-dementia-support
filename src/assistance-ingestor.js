@@ -42,7 +42,7 @@ async function fetchListing(path) {
   if (page.base_path !== path || page.locale !== "en" ||
       typeof page.title !== "string" || !page.title.trim() ||
       typeof page.description !== "string" || !page.description.trim() ||
-      page.withdrawn_notice) {
+      Object.keys(page.withdrawn_notice ?? {}).length > 0) {
     throw new Error(`${path}: unexpected or withdrawn GOV.UK content`);
   }
   return {
