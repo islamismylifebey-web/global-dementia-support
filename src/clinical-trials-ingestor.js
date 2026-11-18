@@ -97,7 +97,16 @@ async function ingest(env, profile) {
       brief_summary=excluded.brief_summary,
       last_update_posted_at=excluded.last_update_posted_at,
       contacts_json=excluded.contacts_json,
-      updated_at=excluded.updated_at`;
+      updated_at=excluded.updated_at
+    WHERE clinical_trials.last_update_posted_at IS NOT excluded.last_update_posted_at
+       OR clinical_trials.title IS NOT excluded.title
+       OR clinical_trials.status IS NOT excluded.status
+       OR clinical_trials.brief_summary IS NOT excluded.brief_summary
+       OR clinical_trials.study_type IS NOT excluded.study_type
+       OR clinical_trials.conditions_json IS NOT excluded.conditions_json
+       OR clinical_trials.phase_json IS NOT excluded.phase_json
+       OR clinical_trials.contacts_json IS NOT excluded.contacts_json
+`;
 
   const statements = [];
   const studyIds = [];
