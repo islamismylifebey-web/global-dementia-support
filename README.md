@@ -2,6 +2,14 @@
 
 A worldwide directory of dementia support, care, and assistance resources. The project is designed to help people affected by dementia find trustworthy organizations and services in their country, language, and community.
 
+### Free support and benefit referrals
+
+`data/free-support.psv` lists official benefit, application help, and free referral pages. Each entry includes the source URL and a public phone number when verified for the listed service. Benefits have their own eligibility rules. Local services reached through a referral may charge.
+
+To regenerate the directory seed, save the [Alzheimer’s Disease International member directory](https://www.alzint.org/our-members/member-associations/) as HTML and pass that file to `python scripts/seed-free-support.py`. Redirect the UTF-8 output to a SQL file, review it, then import it with `npx wrangler d1 execute global-dementia-support-db --remote --file <file>`. ADI entries link to the association profiles, where users can find current contact details. The upserts preserve verification status and existing resource IDs.
+
+For regional coverage, save HTML snapshots from the [Medicaid contact table](https://www.medicaid.gov/about-us/where-can-people-get-help-medicaid-chip), [SHIP locator](https://www.shiphelp.org/), and [211 Canada provider list](https://211.ca/211-service-providers/). Pass them in that order to `python scripts/seed-regional-support.py` and review and import the SQL the same way. Medicaid entries link to the jurisdiction's section of the federal contact table so visitors can choose the appropriate application or contact link. SHIP and 211 entries link to their regional profiles or providers.
+
 ## Project status
 
 **Phase 3: First public deployment.** The responsive public interface and read-only REST API are deployed together on Cloudflare Workers. The homepage includes a plain-language dementia support search, type-of-help and language filters, optional nearby search, professional discovery, verification labels, consent-based emergency location sharing, and visible safety commitments. The D1 database is connected but currently contains **0 resource records**. No verified professional dataset or emergency-response enrollment network is populated yet.
